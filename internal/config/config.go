@@ -18,21 +18,21 @@ type Logger struct {
 type Db struct {
 	Host         string `yaml:"host"`
 	Port         int    `yaml:"port"`
-	User         string `yaml:"user"`
-	Password     string `yaml:"password"`
-	Name         string `yaml:"name"`
+	User         string `yaml:"user" env:"POSTGRES_USER"`
+	Password     string `yaml:"password" env:"POSTGRES_PASSWORD"`
+	Name         string `yaml:"name" env:"POSTGRES_DB"`
 	DbTimeoutSec int    `yaml:"db_timeout_sec"`
 }
 
 func ReadConfig(configPath string) (*Config, error) {
 	cfg := Config{}
 
-	err := cleanenv.ReadEnv(&cfg)
+	err := cleanenv.ReadConfig(configPath, &cfg)
 	if err != nil {
 		return nil, fmt.Errorf("read config error: %v", err.Error())
 	}
 
-	err = cleanenv.ReadConfig(configPath, &cfg)
+	err = cleanenv.ReadEnv(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("read config error: %v", err.Error())
 	}

@@ -1,0 +1,234 @@
+definitions:
+  domain.GetCoupletResponse:
+    properties:
+      couplet:
+        type: string
+    type: object
+  domain.GetSongResponse:
+    properties:
+      link:
+        type: string
+      release_date:
+        type: string
+      text:
+        type: string
+    type: object
+  domain.Song:
+    properties:
+      group:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      releaseDate:
+        type: string
+      text:
+        type: string
+    type: object
+  error_handler.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact: {}
+  description: Songs Library API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /info:
+    get:
+      consumes:
+      - application/json
+      description: get song info
+      parameters:
+      - description: group of song
+        in: query
+        name: group
+        type: string
+      - description: name of song
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetSongResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Get song info
+      tags:
+      - songs
+  /songs:
+    delete:
+      description: delete song
+      parameters:
+      - description: group of song
+        in: query
+        name: group
+        type: string
+      - description: name of song
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Delete song
+      tags:
+      - songs
+    get:
+      consumes:
+      - application/json
+      description: get songs with filter, limit and offset
+      parameters:
+      - description: songs on page
+        in: query
+        name: limit
+        type: string
+      - description: page
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Song'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Get songs with filter, limit and offset
+      tags:
+      - songs
+    patch:
+      consumes:
+      - application/json
+      description: update song
+      parameters:
+      - description: group of song
+        in: query
+        name: group
+        type: string
+      - description: name of song
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Song'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Update song
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: create song
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Song'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Create song
+      tags:
+      - songs
+  /songs/couplet:
+    get:
+      consumes:
+      - application/json
+      description: get couplet with offset
+      parameters:
+      - description: group of song
+        in: query
+        name: group
+        type: string
+      - description: name of song
+        in: query
+        name: name
+        type: string
+      - description: number of couplet
+        in: query
+        name: offset
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetCoupletResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error_handler.HTTPError'
+      summary: Get couplet with offset
+      tags:
+      - songs
+swagger: "2.0"
