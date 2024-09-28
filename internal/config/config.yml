@@ -1,0 +1,12 @@
+logger:
+    log_level: "debug"
+    log_file: "./ytloader.log"
+
+postgres:
+    host: "postgres"
+    port: 5432
+    user: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    name: ${POSTGRES_DB}
+    db-timeout-sec: 5
+
