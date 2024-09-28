@@ -49,6 +49,8 @@ func Run() {
 	router.DELETE("/songs", songHandler.Delete)
 	router.PATCH("/songs", songHandler.Update)
 	router.GET("/songs", songHandler.GetSongs)
+	router.GET("/info", songHandler.Get)
+	router.GET("/songs/couplet", songHandler.GetCouplet)
 
 	router.Run("localhost:8080")
 }

@@ -84,7 +84,7 @@ func (p *PostgresSongRepo) Get(ctx context.Context, group string, name string) (
 	where song_group=$1 and name=$2`
 
 	var newSong domain.Song
-	err := p.db.QueryRow(ctx, query, group, name).Scan(&newSong, &newSong.Name,
+	err := p.db.QueryRow(ctx, query, group, name).Scan(&newSong.Group, &newSong.Name,
 		&newSong.ReleaseDate, &newSong.Text, &newSong.Link)
 	if err != nil {
 		p.lg.Warn("get error", zap.Error(err))

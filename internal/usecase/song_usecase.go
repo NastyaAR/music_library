@@ -6,6 +6,7 @@ import (
 	"github.com/NastyaAR/music_library/internal/domain"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
+	"strings"
 	"time"
 )
 
@@ -171,7 +172,7 @@ func (s *SongUsecase) GetSongs(ctx context.Context, filter *domain.Song,
 		return nil, domain.ErrBadLimit
 	}
 
-	if offset < 0 {
+	if offset < 1 {
 		s.lg.Warn("getsongs error: bad offset",
 			zap.Error(domain.ErrBadOffset))
 		return nil, domain.ErrBadOffset
@@ -180,7 +181,7 @@ func (s *SongUsecase) GetSongs(ctx context.Context, filter *domain.Song,
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
 
-	songs, err := s.songRepo.GetAll(dbCtx, filter, limit, offset)
+	songs, err := s.songRepo.GetAll(dbCtx, filter, limit, offset-1)
 	if err != nil {
 		s.lg.Warn("getsongs error", zap.Error(err))
 		return nil, fmt.Errorf("getsongs error: %v", err.Error())
@@ -236,16 +237,22 @@ func (s *SongUsecase) GetСouplet(ctx context.Context,
 		return "", domain.ErrBadName
 	}
 
+	if offset < 1 {
+		s.lg.Warn("getcouplet error: bad offset",
+			zap.Error(domain.ErrBadOffset))
+		return "", domain.ErrBadOffset
+	}
+
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
 
-	_, err := s.songRepo.Get(dbCtx, group, name)
+	song, err := s.songRepo.Get(dbCtx, group, name)
 	if err != nil {
 		s.lg.Warn("getcouplet error", zap.Error(err))
 		return "", fmt.Errorf("getcouplet error: %v", err.Error())
 	}
 
-	//split хитренький нужен
+	couplets := strings.Split(song.Text, "\n\n")
 
-	return "", nil
+	return couplets[offset-1], nil
 }

@@ -48,13 +48,13 @@ func (h *SongHandler) Create(ctx *gin.Context) {
 
 	body, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
-		h.lg.Warn("song handler: create error", zap.Error(err))
+		h.lg.Warn("song handler: create error: read", zap.Error(err))
 		error_handler.NewError(ctx, domain.ErrInternalServer)
 		return
 	}
 	err = json.Unmarshal(body, &songRequest)
 	if err != nil {
-		h.lg.Warn("song handler: create error", zap.Error(err))
+		h.lg.Warn("song handler: create error: unmarsh", zap.Error(err), zap.Any("req", ctx.Request.Body))
 		error_handler.NewError(ctx, domain.ErrInternalServer)
 		return
 	}
@@ -297,4 +297,96 @@ func (h *SongHandler) GetSongs(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, songsResponse)
+}
+
+// Get godoc
+// @Summary      Get song info
+// @Description  get song info
+// @Tags         songs
+// @Accept 		 json
+// @Produce      json
+// @Param        group    query     string  false  "group of song"
+// @Param        name    query     string  false  "name of song"
+// @Success      200  {object}  domain.GetSongResponse
+// @Failure      400  {object}  error_handler.HTTPError
+// @Failure      500  {object}  error_handler.HTTPError
+// @Router       /info [get]
+func (h *SongHandler) Get(ctx *gin.Context) {
+	group := ctx.Request.URL.Query().Get("group")
+	if group == "" {
+		h.lg.Warn("song handler: get error")
+		error_handler.NewError(ctx, domain.ErrBadGroup)
+		return
+	}
+
+	name := ctx.Request.URL.Query().Get("name")
+	if name == "" {
+		h.lg.Warn("song handler: get error")
+		error_handler.NewError(ctx, domain.ErrBadName)
+		return
+	}
+
+	song, err := h.songUsecase.Get(ctx, group, name)
+	if err != nil {
+		h.lg.Warn("song handler: get error", zap.Error(err))
+		error_handler.NewError(ctx, err)
+		return
+	}
+
+	got := domain.GetSongResponse{
+		ReleaseDate: getDate(song.ReleaseDate),
+		Text:        song.Text,
+		Link:        song.Link,
+	}
+
+	ctx.JSON(http.StatusOK, got)
+}
+
+// GetCouplet godoc
+// @Summary      Get couplet with offset
+// @Description  get couplet with offset
+// @Tags         songs
+// @Accept 		 json
+// @Produce      json
+// @Param        group    query     string  false  "group of song"
+// @Param        name    query     string  false  "name of song"
+// @Param        offset    query     string  false  "number of couplet"
+// @Success      200  {object}  domain.GetCoupletResponse
+// @Failure      400  {object}  error_handler.HTTPError
+// @Failure      500  {object}  error_handler.HTTPError
+// @Router       /songs/couplet [get]
+func (h *SongHandler) GetCouplet(ctx *gin.Context) {
+	group := ctx.Request.URL.Query().Get("group")
+	if group == "" {
+		h.lg.Warn("song handler: get error")
+		error_handler.NewError(ctx, domain.ErrBadGroup)
+		return
+	}
+
+	name := ctx.Request.URL.Query().Get("name")
+	if name == "" {
+		h.lg.Warn("song handler: get error")
+		error_handler.NewError(ctx, domain.ErrBadName)
+		return
+	}
+
+	offsetStr := ctx.Request.URL.Query().Get("offset")
+	if offsetStr == "" {
+		h.lg.Warn("song handler: getcouplet error")
+		error_handler.NewError(ctx, domain.ErrBadOffset)
+		return
+	}
+
+	offset, _ := strconv.Atoi(offsetStr)
+
+	c, err := h.songUsecase.GetСouplet(ctx, group, name, offset)
+	if err != nil {
+		h.lg.Warn("song handler: get error", zap.Error(err))
+		error_handler.NewError(ctx, err)
+		return
+	}
+
+	couplet := domain.GetCoupletResponse{Couplet: c}
+
+	ctx.JSON(http.StatusOK, couplet)
 }
