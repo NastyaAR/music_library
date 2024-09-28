@@ -16,6 +16,7 @@ var ErrBadReleaseDate = errors.New("bad release date")
 var ErrBadLimit = errors.New("bad limit")
 var ErrBadOffset = errors.New("bad offset")
 var ErrInternalServer = errors.New("something wrong while creating song")
+var ErrQueryParams = errors.New("bad query params")
 
 var TimeLayout = "16.07.2006"
 
@@ -58,7 +59,7 @@ type GetSongResponse struct {
 }
 
 type GetSongsResponse struct {
-	Songs []CreateSongResponse
+	Songs []CreateSongResponse `json:"songs"`
 }
 
 type GetCoupletResponse struct {

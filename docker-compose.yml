@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:12.19-bullseye
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/main/postgres.conf:/usr/local/etc/postgres/postgres.conf
+      - ./postgres/main/init:/docker-entrypoint-initdb.d
+      - ./postgres/main/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+    networks:
+        - dev
+
+#  postgres-test:
+#    image: postgres:12.19-bullseye
+#    container_name: postgres-test-db
+#    environment:
+#      POSTGRES_DB: test-db
+#      POSTGRES_USER: test-user
+#      POSTGRES_PASSWORD: test-password
+#      PGDATA: "/var/lib/postgresql/data/pgdata"
+#    ports:
+#      - "5431:5432"
+#    volumes:
+#      - ./conf/test-postgres.conf:/usr/local/etc/postgres/postgres.conf
+#      - test-postgres-init:/docker-entrypoint-initdb.d
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U test-user -d test-db"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 10s
+#    restart: unless-stopped
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.2'
+#          memory: 512M
+#    networks:
+#      - dev
+
+
+volumes:
+  postgres_main:
+
+  
+networks:
+    dev: 
+        driver: bridge

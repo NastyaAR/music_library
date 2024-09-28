@@ -19,9 +19,10 @@ type SongUsecase struct {
 func NewSongUsecase(songRepo domain.SongRepo, valid *validator.Validate, lg *zap.Logger) *SongUsecase {
 	lg.With(zap.String("component", "song usecase"))
 	return &SongUsecase{
-		songRepo: songRepo,
-		validate: valid,
-		lg:       lg,
+		songRepo:  songRepo,
+		validate:  valid,
+		lg:        lg,
+		dbTimeout: time.Hour,
 	}
 }
 
@@ -49,12 +50,12 @@ func (s *SongUsecase) Create(ctx context.Context,
 		return domain.Song{}, domain.ErrBadName
 	}
 
-	err = s.validate.Var(createReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
-	if err != nil {
-		s.lg.Warn("create error: bad release date",
-			zap.Error(domain.ErrBadReleaseDate))
-		return domain.Song{}, domain.ErrBadReleaseDate
-	}
+	//err = s.validate.Var(createReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
+	//if err != nil {
+	//	s.lg.Warn("create error: bad release date",
+	//		zap.Error(domain.ErrBadReleaseDate))
+	//	return domain.Song{}, domain.ErrBadReleaseDate
+	//}
 
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
@@ -89,7 +90,7 @@ func (s *SongUsecase) Delete(ctx context.Context, group string, name string) err
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
 
-	err := s.Delete(dbCtx, group, name)
+	err := s.songRepo.Delete(dbCtx, group, name)
 	if err != nil {
 		s.lg.Warn("delete error", zap.Error(err))
 		return fmt.Errorf("delete error: %v", err.Error())
@@ -134,12 +135,12 @@ func (s *SongUsecase) Update(ctx context.Context, group string, name string, upd
 		return domain.Song{}, domain.ErrBadName
 	}
 
-	err = s.validate.Var(updReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
-	if err != nil {
-		s.lg.Warn("update error: bad release date",
-			zap.Error(domain.ErrBadReleaseDate))
-		return domain.Song{}, domain.ErrBadReleaseDate
-	}
+	//err = s.validate.Var(updReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
+	//if err != nil {
+	//	s.lg.Warn("update error: bad release date",
+	//		zap.Error(domain.ErrBadReleaseDate))
+	//	return domain.Song{}, domain.ErrBadReleaseDate
+	//}
 
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()

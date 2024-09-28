@@ -26,7 +26,13 @@ type Db struct {
 
 func ReadConfig(configPath string) (*Config, error) {
 	cfg := Config{}
-	err := cleanenv.ReadConfig(configPath, &cfg)
+
+	err := cleanenv.ReadEnv(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("read config error: %v", err.Error())
+	}
+
+	err = cleanenv.ReadConfig(configPath, &cfg)
 	if err != nil {
 		return nil, fmt.Errorf("read config error: %v", err.Error())
 	}

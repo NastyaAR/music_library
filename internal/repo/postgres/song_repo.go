@@ -23,12 +23,12 @@ func NewPostgresSongRepo(db *pgxpool.Pool, lg *zap.Logger) *PostgresSongRepo {
 func (p *PostgresSongRepo) Add(ctx context.Context, newSong *domain.Song) (domain.Song, error) {
 	p.lg.Info("add new song", zap.Any("song", *newSong))
 
-	query := `insert into songs(group, name, release_date, text, link)
+	query := `insert into songs(song_group, name, release_date, text, link)
 	values ($1, $2, $3, $4, $5) returning *`
 
 	var createdSong domain.Song
 	err := p.db.QueryRow(ctx, query, newSong.Group, newSong.Name,
-		newSong.ReleaseDate, newSong.Text, newSong.Link).Scan(&createdSong, &createdSong.Name,
+		newSong.ReleaseDate, newSong.Text, newSong.Link).Scan(&createdSong.Group, &createdSong.Name,
 		&createdSong.ReleaseDate, &createdSong.Text, &createdSong.Link)
 	if err != nil {
 		p.lg.Warn("add error", zap.Error(err))
@@ -43,7 +43,7 @@ func (p *PostgresSongRepo) Delete(ctx context.Context, group string, name string
 	p.lg.Info("delete song", zap.String("group", group),
 		zap.String("name", name))
 
-	query := `delete from songs where group=$1 and name=$2`
+	query := `delete from songs where song_group=$1 and name=$2`
 	_, err := p.db.Exec(ctx, query, group, name)
 	if err != nil {
 		p.lg.Warn("delete error", zap.Error(err))
@@ -58,14 +58,14 @@ func (p *PostgresSongRepo) Update(ctx context.Context, group string, name string
 	p.lg.Info("update song", zap.String("group", group),
 		zap.String("name", name))
 
-	query := `update songs set group=$1, name=$2, release_date=$3,
+	query := `update songs set song_group=$1, name=$2, release_date=$3,
                  text=$4, link=$5
-				where group=$6 and name=$7
+				where song_group=$6 and name=$7
 				returning *`
 
 	var newSong domain.Song
 	err := p.db.QueryRow(ctx, query, upd.Group, upd.Name,
-		upd.ReleaseDate, upd.Text, upd.Link).Scan(&newSong, &newSong.Name,
+		upd.ReleaseDate, upd.Text, upd.Link, group, name).Scan(&newSong.Group, &newSong.Name,
 		&newSong.ReleaseDate, &newSong.Text, &newSong.Link)
 	if err != nil {
 		p.lg.Warn("update error", zap.Error(err))
@@ -81,7 +81,7 @@ func (p *PostgresSongRepo) Get(ctx context.Context, group string, name string) (
 		zap.String("name", name))
 
 	query := `select * from songs
-	where group=$1 and name=$2`
+	where song_group=$1 and name=$2`
 
 	var newSong domain.Song
 	err := p.db.QueryRow(ctx, query, group, name).Scan(&newSong, &newSong.Name,
@@ -100,7 +100,7 @@ func getFilterParams(filter *domain.Song) ([]string, []interface{}) {
 	values := make([]interface{}, 0)
 	cnt := 3
 	if filter.Group != "" {
-		where = append(where, fmt.Sprintf(`group=$%d`, cnt))
+		where = append(where, fmt.Sprintf(`song_group=$%d`, cnt))
 		cnt += 1
 		values = append(values, filter.Group)
 	}
