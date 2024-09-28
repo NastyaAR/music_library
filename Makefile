@@ -1,7 +1,7 @@
 .PHONY: migrate run swagger
 
 migrate:
-	migrate -source file://migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?sslmode=disable up
+	migrate -source file://migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable up
 
 run: migrate
 	go run cmd/main.go

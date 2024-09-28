@@ -1,3 +1,0 @@
-sqlite3:
-  storage: "../sqlite/test/ytloader.db"
-  db_timeout_sec: 5

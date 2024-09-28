@@ -1,6 +1,8 @@
 package main
 
-import "github.com/NastyaAR/music_library/internal/app"
+import (
+	"github.com/NastyaAR/music_library/internal/app"
+)
 
 // @title           Swagger Example API
 // @version         1.0

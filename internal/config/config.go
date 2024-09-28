@@ -16,7 +16,7 @@ type Logger struct {
 }
 
 type Db struct {
-	Host         string `yaml:"host"`
+	Host         string `yaml:"host" env:"POSTGRES_HOST"`
 	Port         int    `yaml:"port"`
 	User         string `yaml:"user" env:"POSTGRES_USER"`
 	Password     string `yaml:"password" env:"POSTGRES_PASSWORD"`

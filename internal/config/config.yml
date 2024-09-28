@@ -3,7 +3,7 @@ logger:
     log_file: "./ytloader.log"
 
 postgres:
-    host: "postgres"
+    host: ${POSTGRES_HOST}
     port: 5432
     user: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
