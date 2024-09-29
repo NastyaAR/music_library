@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/NastyaAR/music_library/internal/domain"
+	"github.com/NastyaAR/music_library/internal/pkg/date_validate"
 	"github.com/NastyaAR/music_library/internal/pkg/error_handler"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -33,6 +34,26 @@ func getDate(timestamp time.Time) string {
 	return result
 }
 
+func getDateFromUser(date string) (time.Time, error) {
+	if !date_validate.IsValidDate(date) {
+		return time.Time{}, domain.ErrBadReleaseDate
+	}
+
+	parts := strings.Split(date, ".")
+
+	numOfDate := make([]int, 3)
+	var err error
+	for i, part := range parts {
+		numOfDate[i], err = strconv.Atoi(part)
+		if err != nil {
+			return time.Time{}, domain.ErrBadReleaseDate
+		}
+	}
+
+	res := time.Date(numOfDate[2], time.Month(numOfDate[1]), numOfDate[0], 0, 0, 0, 0, time.UTC)
+	return res, nil
+}
+
 // Create godoc
 // @Summary      Create song
 // @Description  create song
@@ -59,13 +80,13 @@ func (h *SongHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	var releaseDate time.Time
+	var date time.Time
 
 	if songRequest.ReleaseDate != "" {
-		releaseDate, err = time.Parse(domain.TimeLayout, songRequest.ReleaseDate)
+		date, err = getDateFromUser(songRequest.ReleaseDate)
 		if err != nil {
-			h.lg.Warn("song handler: create error", zap.Error(err))
-			error_handler.NewError(ctx, domain.ErrInternalServer)
+			h.lg.Warn("song handler: create error: unmarsh", zap.Error(err))
+			error_handler.NewError(ctx, err)
 			return
 		}
 	}
@@ -73,7 +94,7 @@ func (h *SongHandler) Create(ctx *gin.Context) {
 	song := domain.Song{
 		Group:       songRequest.Group,
 		Name:        songRequest.Name,
-		ReleaseDate: releaseDate,
+		ReleaseDate: date,
 		Text:        songRequest.Text,
 		Link:        songRequest.Link,
 	}
@@ -174,13 +195,13 @@ func (h *SongHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	var releaseDate time.Time
+	var date time.Time
 
 	if songRequest.ReleaseDate != "" {
-		releaseDate, err = time.Parse(domain.TimeLayout, songRequest.ReleaseDate)
+		date, err = getDateFromUser(songRequest.ReleaseDate)
 		if err != nil {
-			h.lg.Warn("song handler: create error", zap.Error(err))
-			error_handler.NewError(ctx, domain.ErrInternalServer)
+			h.lg.Warn("song handler: create error: unmarsh", zap.Error(err))
+			error_handler.NewError(ctx, err)
 			return
 		}
 	}
@@ -188,7 +209,7 @@ func (h *SongHandler) Update(ctx *gin.Context) {
 	song := domain.Song{
 		Group:       songRequest.Group,
 		Name:        songRequest.Name,
-		ReleaseDate: releaseDate,
+		ReleaseDate: date,
 		Text:        songRequest.Text,
 		Link:        songRequest.Link,
 	}
@@ -257,13 +278,13 @@ func (h *SongHandler) GetSongs(ctx *gin.Context) {
 		return
 	}
 
-	var releaseDate time.Time
+	var date time.Time
 
 	if songRequest.ReleaseDate != "" {
-		releaseDate, err = time.Parse(domain.TimeLayout, songRequest.ReleaseDate)
+		date, err = getDateFromUser(songRequest.ReleaseDate)
 		if err != nil {
-			h.lg.Warn("song handler: getsongs error", zap.Error(err))
-			error_handler.NewError(ctx, domain.ErrInternalServer)
+			h.lg.Warn("song handler: create error: unmarsh", zap.Error(err))
+			error_handler.NewError(ctx, err)
 			return
 		}
 	}
@@ -271,7 +292,7 @@ func (h *SongHandler) GetSongs(ctx *gin.Context) {
 	filter := domain.Song{
 		Group:       songRequest.Group,
 		Name:        songRequest.Name,
-		ReleaseDate: releaseDate,
+		ReleaseDate: date,
 		Text:        songRequest.Text,
 		Link:        songRequest.Link,
 	}

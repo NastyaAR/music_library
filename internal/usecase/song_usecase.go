@@ -51,13 +51,6 @@ func (s *SongUsecase) Create(ctx context.Context,
 		return domain.Song{}, domain.ErrBadName
 	}
 
-	//err = s.validate.Var(createReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
-	//if err != nil {
-	//	s.lg.Warn("create error: bad release date",
-	//		zap.Error(domain.ErrBadReleaseDate))
-	//	return domain.Song{}, domain.ErrBadReleaseDate
-	//}
-
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
 
@@ -135,13 +128,6 @@ func (s *SongUsecase) Update(ctx context.Context, group string, name string, upd
 			zap.Error(domain.ErrBadName))
 		return domain.Song{}, domain.ErrBadName
 	}
-
-	//err = s.validate.Var(updReq.ReleaseDate, "regexp=^0[1-9]|[12][0-9]|3[01]).(0[1-9]|1[0-2]).(\\d{4}$")
-	//if err != nil {
-	//	s.lg.Warn("update error: bad release date",
-	//		zap.Error(domain.ErrBadReleaseDate))
-	//	return domain.Song{}, domain.ErrBadReleaseDate
-	//}
 
 	dbCtx, cancel := context.WithTimeout(ctx, s.dbTimeout)
 	defer cancel()
@@ -253,6 +239,11 @@ func (s *SongUsecase) GetСouplet(ctx context.Context,
 	}
 
 	couplets := strings.Split(song.Text, "\n\n")
+
+	if offset-1 >= len(couplets) {
+		s.lg.Warn("getcouplet error", zap.Error(err))
+		return "", fmt.Errorf("getcouplet error: %v", domain.ErrBadOffset)
+	}
 
 	return couplets[offset-1], nil
 }
